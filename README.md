@@ -14,6 +14,10 @@ free-tier LLM API.
    to be genuinely relevant, and — only if relevant context exists — sends
    it + your question to a free Groq LLM, which answers using only that
    context. If nothing relevant is found, it says so instead of guessing.
+3. Visitors can also upload their own `.txt`, `.md`, or `.pdf` files directly
+   in the app sidebar — these are chunked and embedded live, in-session, and
+   merged into retrieval alongside the pre-loaded documents, without being
+   saved to disk.
 
 ## Setup
 
@@ -69,7 +73,7 @@ it are discarded, and if nothing passes, the app skips the LLM call
 entirely and reports that no relevant information was found, rather than
 risking a hallucinated answer.
 
-## Possible improvements (good for a resume bullet or interview talking point)
+## Roadmap / Future Improvements
 - Swap character-based chunking for sentence/paragraph-aware chunking
 - Add a small evaluation set of Q&A pairs to measure retrieval accuracy
 - Cite exact source + page number instead of just filename
