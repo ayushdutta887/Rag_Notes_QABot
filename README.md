@@ -1,16 +1,19 @@
 # 📚 Notes & Papers Q&A Bot (RAG)
 
 A Retrieval-Augmented Generation (RAG) app that answers questions grounded in
-your own notes and research papers. Embeddings run locally (free), and
-generation uses Groq's free-tier LLM API.
+your own notes and research papers, instead of relying on an LLM's general
+knowledge. Embeddings run locally (free), and generation uses Groq's
+free-tier LLM API.
 
 ## How it works
 1. `ingest.py` loads your files from `data/`, splits them into overlapping
    chunks, embeds them locally with `sentence-transformers`, and stores them
    in a FAISS vector index.
 2. `app.py` (Streamlit) takes your question, retrieves the most relevant
-   chunks from the index, and sends them + your question to a free Groq LLM,
-   which answers using only that context.
+   chunks from the index, filters out any that are too semantically distant
+   to be genuinely relevant, and — only if relevant context exists — sends
+   it + your question to a free Groq LLM, which answers using only that
+   context. If nothing relevant is found, it says so instead of guessing.
 
 ## Setup
 
@@ -54,11 +57,21 @@ rag-qa-bot/
 ## Tech stack
 - **Embeddings:** `sentence-transformers` (all-MiniLM-L6-v2) — free, runs locally
 - **Vector store:** FAISS
-- **Generation:** Groq API (Llama 3.3 70B) — free tier
+- **Generation:** Groq API (openai/gpt-oss-120b) — free tier
 - **UI:** Streamlit
+
+## Key design decision: relevance filtering
+Early testing showed that FAISS always returns the top-k nearest chunks —
+even when none of them are actually relevant to the question. This meant
+irrelevant text was still being passed to the LLM as "context." To fix
+this, retrieval results are filtered by a distance threshold: chunks beyond
+it are discarded, and if nothing passes, the app skips the LLM call
+entirely and reports that no relevant information was found, rather than
+risking a hallucinated answer.
 
 ## Possible improvements (good for a resume bullet or interview talking point)
 - Swap character-based chunking for sentence/paragraph-aware chunking
 - Add a small evaluation set of Q&A pairs to measure retrieval accuracy
 - Cite exact source + page number instead of just filename
 - Deploy for free on Streamlit Community Cloud or HuggingFace Spaces
+- Add OCR support for scanned/image-based PDFs
